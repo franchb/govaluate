@@ -1,11 +1,11 @@
 package govaluate
 
 import (
+	"errors"
 	"fmt"
-	"time"
 	"regexp"
 	"testing"
-	"errors"
+	"time"
 )
 
 /*
@@ -507,44 +507,44 @@ func TestNoParameterEvaluation(test *testing.T) {
 		},
 		EvaluationTest{
 
-			Name:  "Logical operator reordering (#30)",
-			Input: "(true && true) || (true && false)",
+			Name:     "Logical operator reordering (#30)",
+			Input:    "(true && true) || (true && false)",
 			Expected: true,
 		},
 		EvaluationTest{
 
-			Name:  "Logical operator reordering without parens (#30)",
-			Input: "true && true || true && false",
+			Name:     "Logical operator reordering without parens (#30)",
+			Input:    "true && true || true && false",
 			Expected: true,
 		},
 		EvaluationTest{
 
-			Name:  "Logical operator reordering with multiple OR (#30)",
-			Input: "false || true && true || false",
+			Name:     "Logical operator reordering with multiple OR (#30)",
+			Input:    "false || true && true || false",
 			Expected: true,
 		},
 		EvaluationTest{
 
-			Name:  "Left-side multiple consecutive (should be reordered) operators",
-			Input: "(10 * 10 * 10) > 10",
+			Name:     "Left-side multiple consecutive (should be reordered) operators",
+			Input:    "(10 * 10 * 10) > 10",
 			Expected: true,
 		},
 		EvaluationTest{
 
-			Name:  "Three-part non-paren logical op reordering (#44)",
-			Input: "false && true || true",
+			Name:     "Three-part non-paren logical op reordering (#44)",
+			Input:    "false && true || true",
 			Expected: true,
 		},
 		EvaluationTest{
 
-			Name:  "Three-part non-paren logical op reordering (#44), second one",
-			Input: "true || false && true",
+			Name:     "Three-part non-paren logical op reordering (#44), second one",
+			Input:    "true || false && true",
 			Expected: true,
 		},
 		EvaluationTest{
 
-			Name:  "Logical operator reordering without parens (#45)",
-			Input: "true && true || false && false",
+			Name:     "Logical operator reordering without parens (#45)",
+			Input:    "true && true || false && false",
 			Expected: true,
 		},
 		EvaluationTest{
@@ -710,7 +710,6 @@ func TestNoParameterEvaluation(test *testing.T) {
 			Expected: true,
 		},
 		EvaluationTest{
-
 			Name:  "Function with colon in function name",
 			Input: "str:length('abcd')",
 			Functions: map[string]ExpressionFunction{
@@ -892,7 +891,7 @@ func TestParameterizedEvaluation(test *testing.T) {
 		},
 		EvaluationTest{
 
-			Name:  "Not-regex against right-hand paramter",
+			Name:  "Not-regex against right-hand parameter",
 			Input: "'foobar' !~ foo",
 			Parameters: []EvaluationParameter{
 				EvaluationParameter{
@@ -904,7 +903,7 @@ func TestParameterizedEvaluation(test *testing.T) {
 		},
 		EvaluationTest{
 
-			Name:  "Regex against two parameter",
+			Name:  "Regex against two parameters",
 			Input: "foo =~ bar",
 			Parameters: []EvaluationParameter{
 				EvaluationParameter{
@@ -920,7 +919,7 @@ func TestParameterizedEvaluation(test *testing.T) {
 		},
 		EvaluationTest{
 
-			Name:  "Not-regex against two paramter",
+			Name:  "Not-regex against two parameters",
 			Input: "foo !~ bar",
 			Parameters: []EvaluationParameter{
 				EvaluationParameter{
@@ -1132,6 +1131,22 @@ func TestParameterizedEvaluation(test *testing.T) {
 		},
 		EvaluationTest{
 
+			Name:  "Floats",
+			Input: "float32 + float64",
+			Parameters: []EvaluationParameter{
+				EvaluationParameter{
+					Name:  "float32",
+					Value: float32(0.0),
+				},
+				EvaluationParameter{
+					Name:  "float64",
+					Value: float64(0.0),
+				},
+			},
+			Expected: 0.0,
+		},
+		EvaluationTest{
+
 			Name:  "Null coalesce right",
 			Input: "foo ?? 1.0",
 			Parameters: []EvaluationParameter{
@@ -1192,24 +1207,24 @@ func TestParameterizedEvaluation(test *testing.T) {
 		},
 		EvaluationTest{
 
-			Name: "Incomparable array equality comparison",
+			Name:  "Incomparable array equality comparison",
 			Input: "arr == arr",
 			Parameters: []EvaluationParameter{
 				EvaluationParameter{
-					Name: "arr",
-					Value: []int {0, 0, 0},
+					Name:  "arr",
+					Value: []int{0, 0, 0},
 				},
 			},
 			Expected: true,
 		},
 		EvaluationTest{
 
-			Name: "Incomparable array not-equality comparison",
+			Name:  "Incomparable array not-equality comparison",
 			Input: "arr != arr",
 			Parameters: []EvaluationParameter{
 				EvaluationParameter{
-					Name: "arr",
-					Value: []int {0, 0, 0},
+					Name:  "arr",
+					Value: []int{0, 0, 0},
 				},
 			},
 			Expected: false,
@@ -1287,108 +1302,123 @@ func TestParameterizedEvaluation(test *testing.T) {
 		},
 		EvaluationTest{
 
-			Name:  "Simple parameter call",
-			Input: "foo.String",
+			Name:       "Simple parameter call",
+			Input:      "foo.String",
 			Parameters: []EvaluationParameter{fooParameter},
-			Expected: fooParameter.Value.(dummyParameter).String,
+			Expected:   fooParameter.Value.(dummyParameter).String,
 		},
 		EvaluationTest{
 
-			Name:  "Simple parameter function call",
-			Input: "foo.Func()",
+			Name:       "Simple parameter function call",
+			Input:      "foo.Func()",
 			Parameters: []EvaluationParameter{fooParameter},
-			Expected: "funk",
+			Expected:   "funk",
 		},
 		EvaluationTest{
 
-			Name:  "Simple parameter call from pointer",
-			Input: "fooptr.String",
+			Name:       "Simple parameter call from pointer",
+			Input:      "fooptr.String",
 			Parameters: []EvaluationParameter{fooPtrParameter},
-			Expected: fooParameter.Value.(dummyParameter).String,
+			Expected:   fooParameter.Value.(dummyParameter).String,
 		},
 		EvaluationTest{
 
-			Name:  "Simple parameter function call from pointer",
-			Input: "fooptr.Func()",
+			Name:       "Simple parameter function call from pointer",
+			Input:      "fooptr.Func()",
 			Parameters: []EvaluationParameter{fooPtrParameter},
-			Expected: "funk",
+			Expected:   "funk",
 		},
 		EvaluationTest{
 
-			Name:  "Simple parameter call",
-			Input: "foo.String == 'hi'",
-			Parameters: []EvaluationParameter{fooParameter},
-			Expected: false,
+			Name:       "Simple parameter function call from pointer",
+			Input:      "fooptr.Func3()",
+			Parameters: []EvaluationParameter{fooPtrParameter},
+			Expected:   "fronk",
 		},
 		EvaluationTest{
 
-			Name:  "Simple parameter call with modifier",
-			Input: "foo.String + 'hi'",
+			Name:       "Simple parameter call",
+			Input:      "foo.String == 'hi'",
 			Parameters: []EvaluationParameter{fooParameter},
-			Expected: fooParameter.Value.(dummyParameter).String + "hi",
+			Expected:   false,
 		},
 		EvaluationTest{
 
-			Name:  "Simple parameter function call, two-arg return",
-			Input: "foo.Func2()",
+			Name:       "Simple parameter call with modifier",
+			Input:      "foo.String + 'hi'",
 			Parameters: []EvaluationParameter{fooParameter},
-			Expected: "frink",
+			Expected:   fooParameter.Value.(dummyParameter).String + "hi",
 		},
 		EvaluationTest{
 
-			Name:  "Simple parameter function call, one arg",
-			Input: "foo.FuncArgStr('boop')",
+			Name:       "Simple parameter function call, two-arg return",
+			Input:      "foo.Func2()",
 			Parameters: []EvaluationParameter{fooParameter},
-			Expected: "boop",
+			Expected:   "frink",
 		},
 		EvaluationTest{
 
-			Name:  "Simple parameter function call, one arg",
-			Input: "foo.FuncArgStr('boop') + 'hi'",
+			Name:       "Parameter function call with all argument types",
+			Input:      "foo.TestArgs(\"hello\", 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1.0, 2.0, true)",
 			Parameters: []EvaluationParameter{fooParameter},
-			Expected: "boophi",
+			Expected:   "hello: 33",
+		},
+
+		EvaluationTest{
+
+			Name:       "Simple parameter function call, one arg",
+			Input:      "foo.FuncArgStr('boop')",
+			Parameters: []EvaluationParameter{fooParameter},
+			Expected:   "boop",
 		},
 		EvaluationTest{
 
-			Name:  "Nested parameter function call",
-			Input: "foo.Nested.Dunk('boop')",
+			Name:       "Simple parameter function call, one arg",
+			Input:      "foo.FuncArgStr('boop') + 'hi'",
 			Parameters: []EvaluationParameter{fooParameter},
-			Expected: "boopdunk",
+			Expected:   "boophi",
 		},
 		EvaluationTest{
 
-			Name:  "Nested parameter call",
-			Input: "foo.Nested.Funk",
+			Name:       "Nested parameter function call",
+			Input:      "foo.Nested.Dunk('boop')",
 			Parameters: []EvaluationParameter{fooParameter},
-			Expected: "funkalicious",
+			Expected:   "boopdunk",
 		},
 		EvaluationTest{
 
-			Name:  "Parameter call with + modifier",
-			Input: "1 + foo.Int",
+			Name:       "Nested parameter call",
+			Input:      "foo.Nested.Funk",
 			Parameters: []EvaluationParameter{fooParameter},
-			Expected: 102.0,
+			Expected:   "funkalicious",
 		},
 		EvaluationTest{
 
-			Name:  "Parameter string call with + modifier",
-			Input: "'woop' + (foo.String)",
+			Name:       "Parameter call with + modifier",
+			Input:      "1 + foo.Int",
 			Parameters: []EvaluationParameter{fooParameter},
-			Expected: "woopstring!",
+			Expected:   102.0,
 		},
 		EvaluationTest{
 
-			Name:  "Parameter call with && operator",
-			Input: "true && foo.BoolFalse",
+			Name:       "Parameter string call with + modifier",
+			Input:      "'woop' + (foo.String)",
 			Parameters: []EvaluationParameter{fooParameter},
-			Expected: false,
+			Expected:   "woopstring!",
 		},
 		EvaluationTest{
 
-			Name:  "Null coalesce nested parameter",
-			Input: "foo.Nil ?? false",
+			Name:       "Parameter call with && operator",
+			Input:      "true && foo.BoolFalse",
 			Parameters: []EvaluationParameter{fooParameter},
-			Expected: false,
+			Expected:   false,
+		},
+		EvaluationTest{
+
+			Name:       "Null coalesce nested parameter",
+			Input:      "foo.Nil ?? false",
+			Parameters: []EvaluationParameter{fooParameter},
+			Expected:   false,
 		},
 	}
 
@@ -1418,7 +1448,7 @@ func TestStructFunctions(test *testing.T) {
 	y2k, _ := time.Parse(parseFormat, "2000")
 	y2k1, _ := time.Parse(parseFormat, "2001")
 
-	functions := map[string]ExpressionFunction {
+	functions := map[string]ExpressionFunction{
 		"func1": func(args ...interface{}) (interface{}, error) {
 			return float64(y2k.Year()), nil
 		},
